@@ -67,21 +67,18 @@ const ChartContainer = React.forwardRef<
 });
 ChartContainer.displayName = 'Chart';
 
-const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
+const generateChartStyles = (id: string, config: ChartConfig) => {
   const colorConfig = Object.entries(config).filter(
     ([_, config]) => config.theme || config.color
   );
 
   if (!colorConfig.length) {
-    return null;
+    return '';
   }
 
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
+  return Object.entries(THEMES)
+    .map(
+      ([theme, prefix]) => `
 ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
@@ -93,8 +90,17 @@ ${colorConfig
   .join('\n')}
 }
 `
-          )
-          .join('\n'),
+    )
+    .join('\n');
+};
+
+const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
+  const chartStyles = generateChartStyles(id, config);
+
+  return (
+    <style
+      dangerouslySetInnerHTML={{
+        __html: chartStyles,
       }}
     />
   );
@@ -217,12 +223,10 @@ const ChartTooltipContent = React.forwardRef<
                               'my-0.5': nestLabel && indicator === 'dashed',
                             }
                           )}
-                          style={
-                            {
-                              '--color-bg': indicatorColor,
-                              '--color-border': indicatorColor,
-                            } as React.CSSProperties
-                          }
+                          style={{
+                            '--color-bg': indicatorColor,
+                            '--color-border': indicatorColor,
+                          } as React.CSSProperties & Record<string, string>}
                         />
                       )
                     )}

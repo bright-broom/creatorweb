@@ -6,186 +6,166 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { works } from "@/lib/works";
 import type { Work } from "@/lib/work";
-import type { FC } from 'react';
+import type { FC } from "react";
 import { ArrowRight, Play } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const categories = ["All", "Commercial", "Documentary", "Music Video", "Short Film"];
+// =============================
+// 型定義
+// =============================
+interface WorkCategory {
+  id: string;
+  label: string;
+}
 
+interface WorkOverlayProps {
+  work: Work
+  hovered: boolean
+}
+
+// =============================
+// カテゴリーリスト（`id` を追加）
+// =============================
+const categories: WorkCategory[] = [
+  { id: "all", label: "All" },
+  { id: "commercial", label: "Commercial" },
+  { id: "documentary", label: "Documentary" },
+  { id: "music-video", label: "Music Video" },
+  { id: "short-film", label: "Short Film" },
+];
+
+// =============================
+// 作品ギャラリーコンポーネント
+// =============================
 const WorksGallery: FC = () => {
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [hoveredWork, setHoveredWork] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [hoveredWork, setHoveredWork] = useState<string | null>(null);
   const router = useRouter();
   const sectionRef = useRef<HTMLElement>(null);
 
+  // カテゴリー変更処理
+  const handleCategoryClick = (category: string) => {
+    setSelectedCategory(category);
+  };
+
+  // ホバー処理
+  const handleMouseEnter = (workId: string) => {
+    setHoveredWork(workId);
+  };
+  const handleMouseLeave = () => {
+    setHoveredWork(null);
+  };
+
+  // `work.id` の型を `string` に統一する
   const filteredWorks = works.filter(
-    (work) => selectedCategory === "All" || work.category === selectedCategory
+    (work) => selectedCategory === "all" || work.category.toLowerCase() === selectedCategory
   );
 
   return (
     <section id="works" ref={sectionRef} className="section-padding relative overflow-hidden">
-      {/* 装飾的な背景要素 */}
-      <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-[hsl(var(--accent-2))] opacity-5 blur-3xl" />
-      <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-[hsl(var(--accent-1))] opacity-5 blur-3xl" />
-      
+      {/* 背景エフェクト */}
+      <BackgroundEffects />
+
       <div className="container relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="space-y-16"
-        >
-          {/* セクションヘッダー */}
-          <div className="text-center space-y-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              viewport={{ once: true }}
-              className="inline-block mb-2"
-            >
-              <span className="px-3 py-1 text-sm rounded-full bg-[hsl(var(--accent-2))]/10 text-[hsl(var(--accent-2))]">
-                PORTFOLIO
-              </span>
-            </motion.div>
-            <h2 className="section-title text-gradient-accent">Featured Works</h2>
-            <p className="section-description mx-auto">
-              Explore my portfolio of visual storytelling across different genres and styles
-            </p>
-          </div>
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }} className="space-y-16">
+          {/* セクションタイトル */}
+          <SectionHeader />
 
           {/* カテゴリーフィルター */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="flex flex-wrap justify-center gap-3"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} viewport={{ once: true }} className="flex flex-wrap justify-center gap-3">
             {categories.map((category) => (
               <Button
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                onClick={() => setSelectedCategory(category)}
+                key={category.id}
+                variant={selectedCategory === category.id ? "default" : "outline"}
+                onClick={() => handleCategoryClick(category.id)}
                 className={`text-sm md:text-base rounded-full px-5 transition-all duration-300 ${
-                  selectedCategory === category 
-                    ? "bg-gradient-accent hover:opacity-90" 
+                  selectedCategory === category.id
+                    ? "bg-gradient-accent hover:opacity-90"
                     : "hover:border-[hsl(var(--accent-2))]/50 hover:text-[hsl(var(--accent-2))]"
                 }`}
               >
-                {category}
+                {category.label}
               </Button>
             ))}
           </motion.div>
 
           {/* 作品グリッド */}
           <AnimatePresence mode="wait">
-            <motion.div
-              key={selectedCategory}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
-            >
+            <motion.div key={selectedCategory} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {filteredWorks.map((work) => (
-                <motion.div
-                  key={work.id}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.5 }}
-                  className="group relative aspect-video overflow-hidden rounded-xl bg-muted transform hover:scale-[1.02] transition-all duration-500 hover:shadow-xl"
-                  onMouseEnter={() => setHoveredWork(work.id)}
-                  onMouseLeave={() => setHoveredWork(null)}
-                  onClick={() => router.push(`/works/${work.id}`)}
-                  style={{ cursor: "pointer" }}
-                >
-                  {/* サムネイル画像 */}
-                  <motion.img
-                    src={work.thumbnail}
-                    alt={work.title}
-                    className="object-cover w-full h-full transition-all duration-700 group-hover:scale-110 group-hover:filter group-hover:brightness-110"
-                  />
-                  
-                  {/* オーバーレイ */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500">
-                    <div className="absolute bottom-0 left-0 right-0 p-5">
-                      <motion.span
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.3 }}
-                        className="inline-block px-2 py-1 text-xs rounded-full bg-[hsl(var(--accent-2))]/20 text-white/90 mb-2"
-                      >
-                        {work.category}
-                      </motion.span>
-                      <motion.h3
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ duration: 0.3 }}
-                        className="text-white font-bold text-xl group-hover:text-[hsl(var(--accent-2))] transition-colors duration-300"
-                      >
-                        {work.title}
-                      </motion.h3>
-                      <motion.p
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ duration: 0.3, delay: 0.1 }}
-                        className="text-white/80 text-sm mt-1 line-clamp-2"
-                      >
-                        {work.description}
-                      </motion.p>
-                      
-                      {/* 詳細を見るボタン */}
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.3, delay: 0.2 }}
-                        className="mt-3 flex items-center text-[hsl(var(--accent-2))] text-sm font-medium"
-                      >
-                        View Details <ArrowRight className="ml-1 w-4 h-4" />
-                      </motion.div>
-                    </div>
-                  </div>
-                  
-                  {/* 再生ボタン（ホバー時） */}
-                  {hoveredWork === work.id && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.3 }}
-                      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
-                    >
-                      <Play className="w-6 h-6 text-white fill-white" />
-                    </motion.div>
-                  )}
-                </motion.div>
+                <WorkItem key={work.id} work={work} hoveredWork={hoveredWork} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} router={router} />
               ))}
             </motion.div>
           </AnimatePresence>
-          
+
           {/* もっと見るボタン */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            viewport={{ once: true }}
-            className="flex justify-center mt-8"
-          >
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="rounded-full border-[hsl(var(--accent-2))]/30 hover:border-[hsl(var(--accent-2))]/50 hover:bg-[hsl(var(--accent-2))]/5 transition-all duration-300"
-            >
-              View All Projects <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
-          </motion.div>
+          <ViewMoreButton />
         </motion.div>
       </div>
     </section>
   );
 };
+
+// =============================
+// 作品アイテムコンポーネント
+// =============================
+const WorkItem: FC<{ work: Work; hoveredWork: string | null; onMouseEnter: (id: string) => void; onMouseLeave: () => void; router: ReturnType<typeof useRouter> }> = ({ work, hoveredWork, onMouseEnter, onMouseLeave, router }) => (
+  <motion.div
+    layout
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.3 }}
+    className="group relative aspect-video overflow-hidden rounded-xl bg-muted hover:shadow-lg"
+    onMouseEnter={() => onMouseEnter(work.id.toString())}
+    onMouseLeave={onMouseLeave}
+    onClick={() => router.push(`/works/${work.id}`)}
+    style={{ cursor: "pointer" }}
+  >
+    <img src={work.thumbnail} alt={work.title} className="object-cover w-full h-full transition-all duration-300 group-hover:scale-105" />
+    <WorkOverlay work={work} hovered={hoveredWork === work.id.toString()} />
+  </motion.div>
+);
+
+// =============================
+// 必要なコンポーネントを追加
+// =============================
+const BackgroundEffects: FC = () => <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background opacity-50" />;
+
+const SectionHeader: FC = () => (
+  <div className="text-center space-y-4">
+    <h2 className="section-title text-gradient-accent">Featured Works</h2>
+    <p className="section-description mx-auto">Explore my portfolio of visual storytelling across different genres and styles</p>
+  </div>
+);
+
+const ViewMoreButton: FC = () => (
+  <div className="flex justify-center mt-8">
+    <Button variant="outline" size="lg">View All Projects <ArrowRight className="ml-2 w-4 h-4" /></Button>
+  </div>
+);
+
+const WorkOverlay: React.FC<WorkOverlayProps> = ({ work, hovered }) => {
+  return (
+    <div
+      className={cn(
+        "absolute inset-0 bg-black/60 flex flex-col justify-end p-6 transition-opacity duration-300",
+        hovered ? "opacity-100" : "opacity-0"
+      )}
+    >
+      <h3 className="text-xl font-bold text-white mb-2">{work.title}</h3>
+      <p className="text-white/80 text-sm line-clamp-2">{work.description}</p>
+      <div className="flex gap-2 mt-4">
+        {work.role.map((role) => (
+          <span
+            key={role}
+            className="px-2 py-1 text-xs rounded-full bg-white/20 text-white"
+          >
+            {role}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export { WorksGallery };

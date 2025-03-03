@@ -1,10 +1,13 @@
-import './globals.css';
+import '@/app/globals.css'
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { ThemeProvider } from '@/components/providers/theme-provider';
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
+import { ThemeProvider } from '@/components/theme-provider';
+import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
 
+// =============================
+// フォント設定 (Next.js のフォントローダーは直接代入する必要がある)
+// =============================
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
@@ -12,10 +15,19 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
+// =============================
+// メタデータ (SEO)
+// =============================
 export const metadata: Metadata = {
   title: 'Professional Portfolio | Video Creator & Director',
   description: 'Professional video creator and director showcasing cinematic storytelling and visual artistry.',
-  keywords: 'video creator, director, cinematography, portfolio, visual storytelling',
+  keywords: [
+    'video creator',
+    'director',
+    'cinematography',
+    'portfolio',
+    'visual storytelling',
+  ],
   viewport: 'width=device-width, initial-scale=1',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: 'white' },
@@ -23,11 +35,17 @@ export const metadata: Metadata = {
   ],
 };
 
-export default function RootLayout({
-  children,
-}: {
+// =============================
+// 型定義: ルートレイアウトの Props
+// =============================
+interface RootLayoutProps {
   children: React.ReactNode;
-}) {
+}
+
+// =============================
+// ルートレイアウトコンポーネント (デフォルトで Server Component)
+// =============================
+export default function RootLayout({ children }: RootLayoutProps): JSX.Element {
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <body className={inter.className} suppressHydrationWarning>
@@ -38,7 +56,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Header />
-          {children}
+          <main>{children}</main>
           <Footer />
         </ThemeProvider>
       </body>

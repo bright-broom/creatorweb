@@ -8,29 +8,42 @@ import { AchievementsSection } from '@/components/sections/achievements';
 import { ContactSection } from '@/components/sections/contact';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
-/**
- * ホームページコンポーネント
- * 各セクションをSuspenseでラップして表示
- * @returns {JSX.Element} ホームページのレイアウト
- */
+// =============================
+// Suspense でラップする汎用コンポーネント
+// =============================
+interface SuspenseWrapperProps {
+  children: React.ReactNode;
+  fallbackText: string;
+}
+
+const SuspenseWrapper = ({ children, fallbackText }: SuspenseWrapperProps) => (
+  <Suspense fallback={<LoadingSpinner size="lg" text={fallbackText} />}>
+    {children}
+  </Suspense>
+);
+
+// =============================
+// 各セクションを配列で管理
+// =============================
+const sections = [
+  { id: 'hero', component: <HeroSection />, label: 'Loading hero section...' },
+  { id: 'works', component: <WorksGallery />, label: 'Loading works gallery...' },
+  { id: 'skills', component: <SkillsSection />, label: 'Loading skills section...' },
+  { id: 'achievements', component: <AchievementsSection />, label: 'Loading achievements section...' },
+  { id: 'contact', component: <ContactSection />, label: 'Loading contact section...' },
+];
+
+// =============================
+// ホームページコンポーネント
+// =============================
 export default function Home(): JSX.Element {
   return (
     <main className="min-h-screen pt-16 mx-auto">
-      <Suspense fallback={<LoadingSpinner size="lg" color="accent" text="Loading hero section..." />}>
-        <HeroSection />
-      </Suspense>
-      <Suspense fallback={<LoadingSpinner size="lg" color="accent" text="Loading works gallery..." />}>
-        <WorksGallery />
-      </Suspense>
-      <Suspense fallback={<LoadingSpinner size="lg" color="accent" text="Loading skills section..." />}>
-        <SkillsSection />
-      </Suspense>
-      <Suspense fallback={<LoadingSpinner size="lg" color="accent" text="Loading achievements section..." />}>
-        <AchievementsSection />
-      </Suspense>
-      <Suspense fallback={<LoadingSpinner size="lg" color="accent" text="Loading contact section..." />}>
-        <ContactSection />
-      </Suspense>
+      {sections.map(({ id, component, label }) => (
+        <SuspenseWrapper key={id} fallbackText={label}>
+          {component}
+        </SuspenseWrapper>
+      ))}
     </main>
   );
 }
