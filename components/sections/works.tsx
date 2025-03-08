@@ -60,6 +60,9 @@ const WorksGallery: FC = () => {
   const filteredWorks = works.filter(
     (work) => selectedCategory === "all" || work.category.toLowerCase() === selectedCategory
   );
+  
+  // 最大9枚のみ表示
+  const displayedWorks = filteredWorks.slice(0, 9);
 
   return (
     <section id="works" ref={sectionRef} className="section-padding relative overflow-hidden">
@@ -92,14 +95,14 @@ const WorksGallery: FC = () => {
           {/* 作品グリッド */}
           <AnimatePresence mode="wait">
             <motion.div key={selectedCategory} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {filteredWorks.map((work) => (
+              {displayedWorks.map((work) => (
                 <WorkItem key={work.id} work={work} hoveredWork={hoveredWork} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} router={router} />
               ))}
             </motion.div>
           </AnimatePresence>
 
-          {/* もっと見るボタン */}
-          <ViewMoreButton />
+          {/* もっと見るボタン - フィルタリングされた作品が9以上ある場合のみ表示 */}
+          {filteredWorks.length > 9 && <ViewMoreButton />}
         </motion.div>
       </div>
     </section>
@@ -138,11 +141,21 @@ const SectionHeader: FC = () => (
   </div>
 );
 
-const ViewMoreButton: FC = () => (
-  <div className="flex justify-center mt-8">
-    <Button variant="outline" size="lg">View All Projects <ArrowRight className="ml-2 w-4 h-4" /></Button>
-  </div>
-);
+const ViewMoreButton: FC = () => {
+  const router = useRouter();
+  
+  return (
+    <div className="flex justify-center mt-8">
+      <Button 
+        variant="outline" 
+        size="lg" 
+        onClick={() => router.push('/works')}
+      >
+        View All Projects <ArrowRight className="ml-2 w-4 h-4" />
+      </Button>
+    </div>
+  );
+};
 
 const WorkOverlay: React.FC<WorkOverlayProps> = ({ work, hovered }) => {
   return (
