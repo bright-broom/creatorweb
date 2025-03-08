@@ -1,11 +1,10 @@
 "use client";
 
 // =============================
-// 🔥 Toast管理ライブラリ（react-hot-toast風）
-// - `useToast()` でトーストを管理
-// - `toast()` で新しいトーストを作成
+// Toast管理ライブラリ（react-hot-toast風）
+// useToast() でトーストを管理
+// toast() で新しいトーストを作成
 // =============================
-
 import * as React from "react";
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
 

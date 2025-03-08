@@ -1,9 +1,9 @@
 import '@/app/globals.css'
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { ThemeProvider } from '@/components/theme-provider';
-import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
+import { ThemeProvider } from '@/components/sections/theme-provider';
+import { Header } from '@/components/sections/header';
+import { Footer } from '@/components/sections/footer';
 
 // =============================
 // フォント設定 (Next.js のフォントローダーは直接代入する必要がある)

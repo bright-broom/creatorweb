@@ -7,7 +7,6 @@ import type { FC } from "react";
 // =============================
 // 型定義
 // =============================
-
 interface Achievement {
   icon: FC<{ className?: string }>;
   number: string;
@@ -21,7 +20,6 @@ interface Client {
 // =============================
 // データ定義（実績 & クライアント）
 // =============================
-
 const achievements: Achievement[] = [
   { icon: Award, number: "15+", label: "Industry Awards" },
   { icon: Users, number: "100+", label: "Satisfied Clients" },
